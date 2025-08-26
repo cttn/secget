@@ -13,7 +13,7 @@ def download_and_merge_sec_filings(
     ticker: str,
     start: str,
     end: str,
-    forms: List[str] = ["10-K", "10-Q", "8-K"],
+    forms: List[str] = [],
     output_dir: Optional[str] = None,
 ) -> str:
     cik = get_cik_from_ticker(ticker)
