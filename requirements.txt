@@ -2,3 +2,4 @@ requests
 PyPDF2
 pdfkit
 python-telegram-bot>=20,<21
+reportlab
