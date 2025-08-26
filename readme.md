@@ -42,6 +42,31 @@ python cli.py --tickers AAPL MSFT --start 2023-01-01 --end 2023-12-31 --forms 10
 
 Podés omitir `--forms` y usará por defecto `10-K`, `10-Q` y `8-K`.
 
+## 🤖 Bot de Telegram
+
+El proyecto incluye un bot de Telegram para solicitar documentos desde un chat.
+
+### Requisitos
+
+- Conseguí un token desde [@BotFather](https://t.me/BotFather).
+- Definí la variable de entorno `TELEGRAM_BOT_TOKEN` con ese token.
+- Instalá las dependencias listadas en `requirements.txt` (incluye `python-telegram-bot`).
+
+### Comandos disponibles
+
+- `/ini YYYY-MM-DD` — establece la fecha inicial. Ejemplo: `/ini 2023-01-01`.
+- `/fin YYYY-MM-DD` — establece la fecha final. Ejemplo: `/fin 2023-12-31`.
+- `/ticker TICKER` — define el ticker a consultar. Ejemplo: `/ticker AAPL`.
+- `/get` — descarga y envía el PDF de filings para el ticker configurado.
+
+### Ejecutar el bot
+
+Iniciá el servicio con:
+
+```bash
+python telegram_bot.py
+```
+
 ## 🧪 Testing automatizado
 
 Instalá dependencias:
