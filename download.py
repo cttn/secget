@@ -3,6 +3,7 @@ import pdfkit
 from bs4 import BeautifulSoup
 from pathlib import Path
 from weasyprint import HTML
+from typing import Optional, Callable
 
 HEADERS = {
     "User-Agent": "secget/0.1 (crls@reflejo.capital)"
@@ -39,7 +40,11 @@ def get_filing_document_url(index_url: str) -> str:
 
     raise ValueError("No se encontró documento visualizable en la tabla de documentos.")
 
-def download_html_and_convert_to_pdf(document_url: str, output_path: str):
+def download_html_and_convert_to_pdf(
+    document_url: str,
+    output_path: str,
+    verbose_callback: Optional[Callable[[str], None]] = None,
+):
     try:
         html_path = Path(output_path).with_suffix(".htm")
         print(f"📥 Guardando HTML en: {html_path.name}")
@@ -50,6 +55,8 @@ def download_html_and_convert_to_pdf(document_url: str, output_path: str):
         print(f"🧾 Convirtiendo a PDF desde archivo local con WeasyPrint...")
         HTML(filename=str(html_path)).write_pdf(output_path)
         print(f"✅ PDF generado en: {output_path}")
+        if verbose_callback:
+            verbose_callback("documento convertido en pdf")
 
     except Exception as e:
         print(f"⚠️ Error al convertir {document_url} a PDF: {e}")
