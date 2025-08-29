@@ -35,7 +35,7 @@ main_module.download_and_merge_sec_filings = _dummy_download
 sys.modules["main"] = main_module
 
 import telegram_bot
-from telegram_bot import ini, fin, ticker, get_docs
+from telegram_bot import ini, fin, ticker, get_docs, v
 
 
 def test_ini_actualiza_start_date():
@@ -62,6 +62,16 @@ def test_ticker_actualiza_ticker():
     assert user_data["ticker"] == "MSFT"
 
 
+def test_v_alterna_verbose():
+    user_data = {}
+    update = SimpleNamespace(message=SimpleNamespace(reply_text=AsyncMock()))
+    context = SimpleNamespace(args=[], user_data=user_data)
+    asyncio.run(v(update, context))
+    assert user_data["verbose"] is True
+    asyncio.run(v(update, context))
+    assert user_data["verbose"] is False
+
+
 def test_get_docs_invoca_descarga(monkeypatch, tmp_path):
     user_data = {
         "ticker": "AAPL",
@@ -82,3 +92,32 @@ def test_get_docs_invoca_descarga(monkeypatch, tmp_path):
 
     mock_download.assert_called_once_with("AAPL", "2023-01-01", "2023-02-01")
     assert mock_reply.called
+
+
+def test_get_docs_pasa_callback_en_verbose(monkeypatch, tmp_path):
+    user_data = {
+        "ticker": "AAPL",
+        "start_date": "2023-01-01",
+        "end_date": "2023-02-01",
+        "verbose": True,
+    }
+    pdf_path = tmp_path / "dummy.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4\n%%EOF")
+
+    captured = {}
+
+    def mock_download(ticker, start, end, forms=[], output_dir=None, verbose_callback=None):
+        captured["cb"] = verbose_callback
+        return str(pdf_path)
+
+    monkeypatch.setattr(telegram_bot, "download_and_merge_sec_filings", mock_download)
+
+    mock_reply_doc = AsyncMock()
+    mock_reply_text = AsyncMock()
+    update = SimpleNamespace(message=SimpleNamespace(reply_document=mock_reply_doc, reply_text=mock_reply_text))
+    context = SimpleNamespace(args=[], user_data=user_data)
+
+    asyncio.run(get_docs(update, context))
+
+    assert callable(captured.get("cb"))
+    assert mock_reply_doc.called

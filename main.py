@@ -3,7 +3,7 @@
 
 import os
 import time
-from typing import List, Optional
+from typing import List, Optional, Callable
 import json
 from fetch import get_cik_from_ticker, search_sec_filings
 from download import download_html_and_convert_to_pdf, get_filing_document_url
@@ -15,6 +15,7 @@ def download_and_merge_sec_filings(
     end: str,
     forms: List[str] = [],
     output_dir: Optional[str] = None,
+    verbose_callback: Optional[Callable[[str], None]] = None,
 ) -> str:
     cik = get_cik_from_ticker(ticker)
     print(f"========== Procesando {ticker} ==========")
@@ -33,11 +34,13 @@ def download_and_merge_sec_filings(
         filing_date = filing["_source"].get("filed", "Sin fecha")
 
         print(f"Descargando y convirtiendo: {index_url}")
+        if verbose_callback:
+            verbose_callback(f"Descargando y convirtiendo: {index_url}")
         doc_url = get_filing_document_url(index_url)
         pdf_path = os.path.join(output_dir, f"{ticker}_{i}_document.pdf")
         final_pdf_path = os.path.join(output_dir, f"{ticker}_{i}.pdf")
 
-        download_html_and_convert_to_pdf(doc_url, pdf_path)
+        download_html_and_convert_to_pdf(doc_url, pdf_path, verbose_callback)
 
         # Crear portada y combinar
         cover_path = os.path.join(output_dir, f"{ticker}_{i}_cover.pdf")
